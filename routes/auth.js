@@ -14,7 +14,7 @@ router.get("/signup", (req, res) => res.render("auth/signup"))
 // POST route ==> to process form data
 
 router.post("/signup", (req, res, next) => {
-    //console.log(req.body)
+    console.log('req.body', req.body)
     const { username, password } = req.body;
 
     bcryptjs
@@ -28,8 +28,12 @@ router.post("/signup", (req, res, next) => {
     })
     .then(userFromDB => {
       console.log('Newly created user is: ', userFromDB);
+      res.redirect(`/auth/profile/${userFromDB.username}`)
     })
     .catch(error => next(error));
-})
+
+});
+
+router.get('/auth/profile/:username', (req, res) => res.render('auth/profile'));
 
 module.exports = router;
