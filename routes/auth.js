@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const router = new Router();
 
-const User = require("../models/User.model");
+const NewUser = require("../models/User.model");
 
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
@@ -22,7 +22,7 @@ router.post("/signup", (req, res, next) => {
     .genSalt(saltRounds)
     .then(salt => bcryptjs.hash(password, salt))
     .then(hashedPassword => {
-      return User.create({
+      return NewUser.create({
         username,
         password: hashedPassword
       });
@@ -54,16 +54,16 @@ router.post('/login', (req, res, next) => {
       return;
     }
    
-    User.findOne({ username })
+    NewUser.findOne({ username })
       .then(user => {
         if (!user) {
           res.render('auth/login', { errorMessage: 'Username is not registered.' });
           return;
         } else if (bcryptjs.compareSync(password, user.password)) {
           const {username} = user;
-          res.render('auth/profile', { user });
-          req.session.currentUser = {username};
-          res.redirect('/profile');
+          console.log(username);
+          req.session.currentUser = username;
+          res.render('auth/profile', {username});
         } else {
           res.render('auth/login', { errorMessage: 'Incorrect password.' });
         }
