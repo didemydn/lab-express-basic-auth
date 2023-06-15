@@ -2,6 +2,7 @@ const { Router } = require('express');
 const router = new Router();
 
 const NewUser = require("../models/User.model");
+const  {isLoggedIn} = require('../middleware/route-guard');
 
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
@@ -35,7 +36,7 @@ router.post("/signup", (req, res, next) => {
 
 });
 
-router.get('/auth/profile/:username', (req, res) => res.render('auth/profile'));
+
 
 //LOGIN//
 
@@ -63,6 +64,7 @@ router.post('/login', (req, res, next) => {
           const {username} = user;
           console.log(username);
           req.session.currentUser = username;
+          user.loggedIn = true;
           res.render('auth/profile', {username});
         } else {
           res.render('auth/login', { errorMessage: 'Incorrect password.' });
@@ -70,5 +72,28 @@ router.post('/login', (req, res, next) => {
       })
       .catch(error => next(error));
   });
+
+  //PROFILE
+
+  router.get('/auth/profile/:username', isLoggedIn, (req, res, next) => {
+    // Session is configured ---> req.session
+   // Use session to persist user loggedIn state ---> req.session.currentUser
+     if(req.session.currentUser){
+         NewUser.findOne({ username: req.session.currentUser.username })
+          .then(foundUser => {
+              console.log('foundUser', foundUser)
+              foundUser.loggedIn = true; // adding a property loggedIn and setting it to true
+              res.render('auth/profile', foundUser)
+          })
+          .catch(err => console.log(err))
+      }
+      else{
+        res.render('auth/profile')
+      }
+  });
+
+  router.get('/auth/profile/:username/main', isLoggedIn, (req, res) => {res.render('auth/main')});
+
+  router.get('/auth/profile/:username/private',isLoggedIn, (req, res) => {res.render('auth/private')});
 
 module.exports = router;
