@@ -6,6 +6,7 @@ const User = require("../models/User.model");
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
  
+//SIGNUP//
 
 // GET route ==> to display the signup form to users
 
@@ -35,5 +36,39 @@ router.post("/signup", (req, res, next) => {
 });
 
 router.get('/auth/profile/:username', (req, res) => res.render('auth/profile'));
+
+//LOGIN//
+
+// GET route ==> to display the login form to users
+router.get('/login', (req, res) => res.render('auth/login'));
+
+// POST login route ==> to process form data
+router.post('/login', (req, res, next) => {
+    console.log('SESSION =====> ', req.session);
+    const { username, password } = req.body;
+   
+    if (username === '' || password === '') {
+      res.render('auth/login', {
+        errorMessage: 'Please enter both, username and password to login.'
+      });
+      return;
+    }
+   
+    User.findOne({ username })
+      .then(user => {
+        if (!user) {
+          res.render('auth/login', { errorMessage: 'Username is not registered.' });
+          return;
+        } else if (bcryptjs.compareSync(password, user.password)) {
+          const {username} = user;
+          res.render('auth/profile', { user });
+          req.session.currentUser = {username};
+          res.redirect('/profile');
+        } else {
+          res.render('auth/login', { errorMessage: 'Incorrect password.' });
+        }
+      })
+      .catch(error => next(error));
+  });
 
 module.exports = router;
