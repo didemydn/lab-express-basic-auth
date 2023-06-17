@@ -92,8 +92,8 @@ router.post('/login', (req, res, next) => {
       }
   });
 
-  router.get('/auth/profile/:username/main', isLoggedIn, (req, res) => {res.render('auth/main')});
+  router.get('/auth/profile/main', isLoggedIn, (req, res) => {res.render('auth/main')});
 
-  router.get('/auth/profile/:username/private',isLoggedIn, (req, res) => {res.render('auth/private')});
+  router.get('/auth/profile/private',isLoggedIn, (req, res) => {res.render('auth/private')});
 
 module.exports = router;
